@@ -7,7 +7,7 @@
 struct Stack {
 	const size_t num_cells; // number of cells.
 	size_t top; // next free cell.
-	
+
 	void **cells; // the storage.
 	void (*destructor) (void *); // the destructor for the
 				     // individual data items.
@@ -17,7 +17,7 @@ struct Stack {
 
 struct Stack *stack_create (size_t num_cells, size_t datasize, void (*destructor) (void *)) {
 	assert(num_cells >= 1);
-	
+
 	struct Stack prototype = {
 		.num_cells = num_cells,
 		.top = 0,
@@ -26,7 +26,7 @@ struct Stack *stack_create (size_t num_cells, size_t datasize, void (*destructor
 		.full = false,
 		.empty = true
 	};
-		
+
 	struct Stack *new_stack = malloc(sizeof(*new_stack));
 
 	memcpy(new_stack, &prototype, sizeof(prototype));
@@ -36,7 +36,7 @@ struct Stack *stack_create (size_t num_cells, size_t datasize, void (*destructor
 
 void foreach (struct Stack *stack, void (*fn) (void *)) {
 	size_t top = stack->top;
-	
+
 	for (size_t i = 0; i < top; i++) {
 		fn(stack->cells[i]);
 	}
@@ -53,7 +53,7 @@ bool stack_push (struct Stack *stack, void *item) {
 	if (stack->full) {
 		return false;
 	}
-	
+
 	stack->cells[stack->top] = item;
 	stack->top++;
 
@@ -68,7 +68,7 @@ void *stack_pop (struct Stack *stack) {
 	if (stack->empty) {
 		return NULL;
 	}
-	
+
 	void *top_element = stack->cells[stack->top];
 
 	stack->top--;
@@ -93,12 +93,6 @@ void int_stack_print (struct Stack *int_stack) {
 	printf("\n");
 }
 
-void int_dtor (void *int_cell) {
-	//	int *cell = (int *)int_cell;
-	
-	free(int_cell);
-}
-
 int *int_cell (int x) {
 	int *cell = malloc(sizeof(int));
 	*cell = x;
@@ -107,7 +101,7 @@ int *int_cell (int x) {
 }
 
 struct Stack *int_stack_create (size_t num_cells) {
-	return stack_create(num_cells, sizeof(int), int_dtor);
+	return stack_create(num_cells, sizeof(int), free);
 }
 
 /* end int stacks */
@@ -117,7 +111,7 @@ struct Stack *int_stack_create (size_t num_cells) {
 char *export_string (struct Stack *char_stack) {
 	size_t num_cells = char_stack->num_cells;
 	size_t top = char_stack->top;
-	
+
 	char *buffer = calloc(num_cells + 1, 1);
 
 	for (int i = 0; i < top; i++) {
@@ -166,6 +160,6 @@ int main (void) {
 
 	stack_destroy(int_stack);
 	stack_destroy(char_stack);
-	
+
 	return 0;
 }
