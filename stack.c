@@ -21,7 +21,7 @@ struct Stack *stack_create (size_t num_cells, size_t datasize, void (*destructor
 	struct Stack prototype = {
 		.num_cells = num_cells,
 		.top = 0,
-		.cells = calloc(num_cells, datasize),
+		.cells = calloc(num_cells, datasize * num_cells),
 		.destructor = destructor,
 		.full = false,
 		.empty = true
@@ -44,6 +44,9 @@ void foreach (struct Stack *stack, void (*fn) (void *)) {
 
 struct Stack stack_destroy (struct Stack *stack) {
 	foreach(stack, stack->destructor);
+
+	free(stack->cells);
+	free(stack);
 }
 
 bool stack_push (struct Stack *stack, void *item) {
@@ -91,7 +94,7 @@ void int_stack_print (struct Stack *int_stack) {
 }
 
 void int_dtor (void *int_cell) {
-	int *cell = (int *)int_cell;
+	//	int *cell = (int *)int_cell;
 	
 	free(int_cell);
 }
@@ -157,7 +160,12 @@ int main (void) {
 	stack_push(char_stack, int_cell('a'));
 	stack_push(char_stack, int_cell('r'));
 	stack_push(char_stack, int_cell('\n'));
+	stack_push(char_stack, int_cell('\0'));
 
 	char_stack_print(char_stack);
+
+	stack_destroy(int_stack);
+	stack_destroy(char_stack);
+	
 	return 0;
 }
